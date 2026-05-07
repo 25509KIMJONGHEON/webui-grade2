@@ -1,17 +1,234 @@
-<html>
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-    <title>My Web Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우당탕탕 털뭉치 일기</title>
+    <style>
+        /* 따뜻하고 포근한 반려동물 테마 컬러 */
+        :root {
+            --bg-main: #fcfbf9;         /* 배경: 따뜻한 아이보리 */
+            --bg-section: #ffffff;      /* 카드 배경: 흰색 */
+            --text-main: #4a4a4a;       /* 텍스트: 부드러운 짙은 회색 */
+            --text-sub: #8c8c8c;        /* 보조 텍스트: 중간 회색 */
+            --color-accent: #f0a07c;    /* 포인트 컬러: 따뜻한 코랄/피치 */
+            --color-highlight: #e28743; /* 강조 컬러: 주황빛 브라운 */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background-color: var(--bg-section);
+            border-top: 5px solid var(--color-accent);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        header .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--color-highlight);
+        }
+
+        nav ul {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--color-accent);
+        }
+
+        /* 공통 섹션 스타일 */
+        section, .hero {
+            padding: 5rem 5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        section h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--color-highlight);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Hero (메인 대문) */
+        .hero {
+            background-color: #f7ede2; /* 메인 배너만 살짝 다른 따뜻한 색 */
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--text-main);
+        }
+
+        .hero-visual {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            background-color: #eaddd3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-sub);
+            border-radius: 12px;
+            font-size: 1.2rem;
+        }
+
+        /* About (소개) */
+        #about p {
+            max-width: 800px;
+            text-align: center;
+            color: var(--text-main);
+            font-size: 1.1rem;
+        }
+
+        /* Gallery (사진 첩) */
+        .gallery-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .photo-card {
+            flex: 1 1 300px;
+            background-color: var(--bg-section);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-5px); /* 마우스 올리면 살짝 위로 뜨는 효과 */
+        }
+
+        .photo-placeholder {
+            width: 100%;
+            height: 250px;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+        }
+
+        .photo-card p {
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Videos (영상) */
+        .video-container {
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            background-color: #e5e5e5;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-sub);
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            background-color: #fff;
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+    </style>
 </head>
 <body>
-   <h1 id="targert">うんこ</h1>
-   <button onclick="sayHello()">Click</button>
 
-   <p id="counter">0</p>
-    <button onclick="increment()">+1</button>
-    <button onclick="decrement()">-1</button> 
-    <button onclick="reset()">Reset</button>
+    <header>
+        <div class="logo">🐾 털뭉치 일기</div>
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#videos">Videos</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <script src="main.js"></script>
-    <script src="counter.js"></script>
+    <main>
+        <div class="hero">
+            <h1>고양이들과 시바견의 우당탕탕 하루</h1>
+            <div class="hero-visual">여기에 아이들이 다 같이 있는 예쁜 메인 사진이 들어갑니다</div>
+        </div>
+
+        <section id="about">
+            <h2>About Us</h2>
+            <p>우리 집의 사랑스러운 가족들을 소개합니다!<br>
+            시크하지만 다정한 고양이들과, 에너지 넘치는 시바견이 함께 살아가는 행복한 공간입니다.</p>
+        </section>
+
+        <section id="gallery">
+            <h2>Gallery</h2>
+            <div class="gallery-grid">
+                <div class="photo-card">
+                    <div class="photo-placeholder">고양이 사진 1</div>
+                    <p>햇살 쬐는 낮잠 시간 ☀️</p>
+                </div>
+                <div class="photo-card">
+                    <div class="photo-placeholder">시바견 사진 1</div>
+                    <p>신나는 산책 시간 🐕</p>
+                </div>
+                <div class="photo-card">
+                    <div class="photo-placeholder">투샷 사진</div>
+                    <p>우리는 사이좋은 친구 🐱🐶</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="videos">
+            <h2>Videos</h2>
+            <p style="margin-bottom: 1.5rem; text-align: center;">가장 최근에 찍은 아이들의 귀여운 영상을 확인해 보세요!</p>
+            <div class="video-container">
+                동영상 플레이어가 들어갈 자리입니다
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 털뭉치 일기. All rights reserved.</p>
+    </footer>
+
 </body>
 </html>
