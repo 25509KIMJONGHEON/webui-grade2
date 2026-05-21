@@ -1,3 +1,541 @@
 <!DOCTYPE html>
 <html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐾 もふもふ日記</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght=400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0095f6;
+            --secondary-btn: #efefef;
+            --bg-color: #fafafa;
+            --border-color: #dbdbdb;
+            --text-color: #262626;
+            --text-secondary: #8e8e8e;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans JP', sans-serif; 
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-color); 
+        }
+        
+        header { 
+            background-color: #ffffff; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; 
+        }
+        .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.5px; cursor: pointer; }
+        
+        nav ul { list-style: none; display: flex; gap: 20px; align-items: center; margin: 0; padding: 0; }
+        .nav-tab { font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; text-decoration: none; }
+        .nav-tab.active { color: var(--text-color); }
+
+        main { max-width: 935px; margin: 0 auto; padding: 30px 20px; }
+
+        /* 👤 프로필 영역 */
+        .profile-container { display: flex; align-items: center; margin-bottom: 44px; padding: 0 20px; gap: 100px; }
+        .profile-photo-area { flex: 0 0 150px; text-align: center; }
+        .profile-img-circle { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); background-color: #eee; }
+        .profile-info-area { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
+        .profile-username-row { display: flex; align-items: center; gap: 20px; }
+        .profile-username { font-size: 1.7rem; font-weight: 300; margin: 0; }
+        
+        .profile-action-area { display: flex; gap: 10px; }
+        
+        /* 통계 행 (클릭 가능하게 커스텀 링크화) */
+        .profile-stats-row { display: flex; gap: 40px; list-style: none; padding: 0; margin: 0; }
+        .profile-stats-row li { font-size: 1rem; }
+        .profile-stats-row .clickable-stat { cursor: pointer; transition: opacity 0.1s; }
+        .profile-stats-row .clickable-stat:hover { opacity: 0.6; }
+        .profile-stats-row span { font-weight: 600; }
+        
+        .profile-bio { font-size: 0.95rem; line-height: 1.5; }
+        .profile-bio .bio-name { font-weight: 700; display: block; margin-bottom: 5px; }
+
+        /* 📸 3열 피드 그리드 */
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+        .photo-card { background-color: #ffffff; border: 1px solid var(--border-color); border-radius: 3px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+        .photo-img-container { width: 100%; position: relative; padding-top: 100%; background-color: #efefef; }
+        .photo-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        
+        .card-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f2f2f2; }
+        .card-uploader-id { font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+        .card-uploader-id:hover { color: var(--text-secondary); text-decoration: underline; }
+
+        .photo-content { padding: 12px 16px; font-size: 0.9rem; flex-grow: 1; display: flex; flex-direction: column; gap: 5px; }
+        .card-footer { padding: 0 16px 12px 16px; display: flex; justify-content: flex-end; }
+
+        /* 업로드 UI */
+        #upload-ui { background: #ffffff; border: 1px solid var(--border-color); border-radius: 3px; padding: 24px; margin-bottom: 30px; text-align: center; }
+        input[type="text"] { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 3px; width: 100%; max-width: 350px; box-sizing: border-box; background: #fafafa; font-size: 0.85rem; margin-bottom: 10px; }
+        input[type="file"] { font-size: 0.8rem; margin-bottom: 15px; }
+
+        /* 버튼들 스타일 */
+        .btn { padding: 6px 14px; border-radius: 4px; border: 1px solid var(--border-color); cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+        .btn-login { background-color: var(--primary-color); color: white; border: none; }
+        .btn-add { background-color: var(--primary-color); color: white; width: 100%; max-width: 350px; padding: 7px; border: none; }
+        .btn-logout { background: none; border: none; color: #262626; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        
+        .btn-p-follow { background-color: var(--primary-color); color: white; border: none; }
+        .btn-p-unfollow { background-color: var(--secondary-btn); color: var(--text-color); }
+        .btn-p-block { background-color: #ffffff; color: #cc3333; border: 1px solid #cc3333; }
+        .btn-delete { background: none; border: none; color: #ed4956; font-size: 0.8rem; font-weight: 600; cursor: pointer; padding: 0; }
+
+        /* 🏁 인스타그램 스타일 팔로우 모달(팝업) 팝업 레이아웃 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; display: none; /* 평소엔 숨김 */
+        }
+        .modal-content {
+            background-color: #ffffff; width: 100%; max-width: 400px;
+            border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+            max-height: 400px;
+        }
+        .modal-header {
+            padding: 14px; text-align: center; font-weight: 700;
+            border-bottom: 1px solid var(--border-color); position: relative;
+        }
+        .modal-close-btn {
+            position: absolute; right: 15px; top: 12px; background: none; border: none;
+            font-size: 1.2rem; cursor: pointer; color: var(--text-color);
+        }
+        .modal-body {
+            padding: 10px 0; overflow-y: auto; flex-grow: 1;
+        }
+        .modal-list-item {
+            display: flex; align-items: center; padding: 8px 16px; gap: 12px;
+        }
+        .modal-user-avatar {
+            width: 35px; height: 35px; border-radius: 50%; background-color: #eee; object-fit: cover;
+        }
+        .modal-user-id {
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+        }
+        .modal-user-id:hover { text-decoration: underline; }
+        .modal-empty-msg {
+            text-align: center; color: var(--text-secondary); padding: 30px; font-size: 0.9rem;
+        }
+
+        @media (max-width: 735px) {
+            .profile-container { gap: 20px; padding: 0; margin-bottom: 24px; flex-direction: column; align-items: flex-start; }
+            .profile-photo-area { flex: unset; text-align: left; }
+            .profile-img-circle { width: 80px; height: 80px; }
+            .gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
+            .photo-card { border: none; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo" id="logo-home">📸 もふもふ日記</div>
+    <nav>
+        <ul>
+            <li><span id="tab-feed" class="nav-tab active">🏠 フィード</span></li>
+            <li><span id="tab-profile" class="nav-tab">👤 マイページ</span></li>
+            <li id="auth-area">
+                <button class="btn btn-login" id="login-btn">ログイン</button>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<main id="main-container">
+    <section class="profile-container" id="profile-section" style="display: none;">
+        <div class="profile-photo-area">
+            <img src="https://via.placeholder.com/150" id="user-avatar" class="profile-img-circle" alt="プロフィール写真">
+        </div>
+        <div class="profile-info-area">
+            <div class="profile-username-row">
+                <h2 class="profile-username" id="profile-id">username</h2>
+                <div class="profile-action-area" id="profile-action-area"></div>
+            </div>
+            <ul class="profile-stats-row">
+                <li>投稿 <span id="post-count">0</span></li>
+                <li class="clickable-stat" id="stat-followers">フォロワー <span id="follower-count">0</span></li>
+                <li class="clickable-stat" id="stat-followings">フォロー中 <span id="following-count">0</span></li>
+            </ul>
+            <div class="profile-bio">
+                <span class="bio-name" id="bio-display-name">Display Name</span>
+                <span id="bio-text">🐾 うちのかわいい家族の日常の記録です。</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="upload-ui" style="display: none;">
+        <h3>新規投稿</h3>
+        <input type="file" id="image-input" accept="image/*"><br>
+        <input type="text" id="caption-input" placeholder="キャプションを書く..."><br>
+        <button class="btn btn-add" id="add-btn">シェアする</button>
+    </section>
+
+    <section id="gallery">
+        <div id="gallery-grid" class="gallery-grid"></div>
+    </section>
+</main>
+
+<div class="modal-overlay" id="relation-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modal-title">ユーザーリスト</span>
+            <button class="modal-close-btn" id="modal-close-btn">×</button>
+        </div>
+        <div class="modal-body" id="modal-list-body">
+            </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7UsnfCzvQ8nkwIzL6rCCOUKEue_8dq2o",
+        authDomain: "sibainu-97b45.firebaseapp.com",
+        projectId: "sibainu-97b45",
+        storageBucket: "sibainu-97b45.firebasestorage.app",
+        messagingSenderId: "462593536348",
+        appId: "1:462593536348:web:def35fd2781d557bee9199",
+        measurementId: "G-XSZ1QNPDSM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    const authArea = document.getElementById('auth-area');
+    const uploadUI = document.getElementById('upload-ui');
+    const galleryGrid = document.getElementById('gallery-grid');
+    const mainContainer = document.getElementById('main-container');
+    const profileSection = document.getElementById('profile-section');
     
+    const userAvatar = document.getElementById('user-avatar');
+    const profileId = document.getElementById('profile-id');
+    const bioDisplayName = document.getElementById('bio-display-name');
+    const bioText = document.getElementById('bio-text');
+    const postCount = document.getElementById('post-count');
+    const followerCount = document.getElementById('follower-count');
+    const followingCount = document.getElementById('following-count');
+    const profileActionArea = document.getElementById('profile-action-area');
+
+    const tabFeed = document.getElementById('tab-feed');
+    const tabProfile = document.getElementById('tab-profile');
+    const logoHome = document.getElementById('logo-home');
+
+    // 팝업창 관련 DOM 요소들
+    const relationModal = document.getElementById('relation-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalListBody = document.getElementById('modal-list-body');
+
+    let currentUser = null;
+    let allPhotos = []; 
+    let myFollowings = [];   
+    let myBlockedUsers = [];  
+    
+    let currentTab = 'feed'; 
+    let profileTargetEmail = null; 
+
+    window.googleLogin = () => signInWithPopup(auth, provider);
+    window.googleLogout = () => signOut(auth);
+
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user; 
+        if (user) {
+            authArea.innerHTML = `<button onclick="googleLogout()" class="btn btn-logout">ログアウト</button>`;
+            startRelationsListener();
+        } else {
+            authArea.innerHTML = `<button onclick="googleLogin()" class="btn btn-login">ログイン</button>`;
+            myFollowings = [];
+            myBlockedUsers = [];
+            switchTab('feed'); 
+        }
+        updateUI();
+    });
+
+    function startRelationsListener() {
+        if (!currentUser) return;
+
+        onSnapshot(query(collection(db, "follows"), where("from", "==", currentUser.email)), (snapshot) => {
+            myFollowings = [];
+            snapshot.forEach(doc => myFollowings.push(doc.data().to));
+            updateProfileStatsAndButtons();
+        });
+
+        onSnapshot(query(collection(db, "blocks"), where("from", "==", currentUser.email)), (snapshot) => {
+            myBlockedUsers = [];
+            snapshot.forEach(doc => myBlockedUsers.push(doc.data().to));
+            renderGallery(allPhotos);
+        });
+    }
+
+    function switchTab(tab, targetUserEmail = null) {
+        currentTab = tab;
+        closeModal(); // 탭 이동 시 켜져 있던 팝업창이 있으면 닫기
+        
+        if (tab === 'feed') {
+            tabFeed.classList.add('active');
+            tabProfile.classList.remove('active');
+            profileTargetEmail = null;
+        } else {
+            if (!currentUser && !targetUserEmail) {
+                alert('マイページを見るにはログインが必要です。');
+                return;
+            }
+            tabFeed.classList.remove('active');
+            tabProfile.classList.add('active');
+            profileTargetEmail = targetUserEmail ? targetUserEmail : currentUser.email;
+        }
+        updateUI();
+    }
+
+    tabFeed.addEventListener('click', () => switchTab('feed'));
+    tabProfile.addEventListener('click', () => switchTab('profile', currentUser ? currentUser.email : null));
+    logoHome.addEventListener('click', () => switchTab('feed'));
+
+    function updateUI() {
+        if (currentTab === 'feed') {
+            profileSection.style.display = 'none';
+            uploadUI.style.display = currentUser ? 'block' : 'none';
+        } else {
+            profileSection.style.display = 'flex';
+            uploadUI.style.display = 'none'; 
+            updateProfileStatsAndButtons();
+        }
+        renderGallery(allPhotos);
+    }
+
+    async function updateProfileStatsAndButtons() {
+        if (currentTab !== 'profile' || !profileTargetEmail) return;
+
+        const targetId = profileTargetEmail.split('@')[0];
+        profileId.innerText = targetId;
+
+        const isMe = currentUser && (currentUser.email === profileTargetEmail);
+
+        if (isMe) {
+            userAvatar.src = currentUser.photoURL ? currentUser.photoURL : 'https://via.placeholder.com/150';
+            bioDisplayName.innerText = currentUser.displayName;
+            bioText.innerText = "🐾 うちのかわいい家族의 일상 기록 공간 (마이 프로필)";
+            profileActionArea.innerHTML = ''; 
+        } else {
+            bioDisplayName.innerText = targetId;
+            bioText.innerText = `🐾 ${targetId}님의 모후모후 스페이스에 오신 걸 환영합니다!`;
+
+            if (currentUser) {
+                const isFollowing = myFollowings.includes(profileTargetEmail);
+                const followBtnHtml = isFollowing
+                    ? `<button class="btn btn-p-unfollow" id="p-action-follow">フォロー中</button>`
+                    : `<button class="btn btn-p-follow" id="p-action-follow">フォローする</button>`;
+                
+                const blockBtnHtml = `<button class="btn btn-p-block" id="p-action-block">ブロック</button>`;
+                
+                profileActionArea.innerHTML = followBtnHtml + blockBtnHtml;
+
+                document.getElementById('p-action-follow').addEventListener('click', async () => {
+                    if (isFollowing) {
+                        const q = query(collection(db, "follows"), where("from", "==", currentUser.email), where("to", "==", profileTargetEmail));
+                        const snap = await getDocs(q);
+                        snap.forEach(async (d) => await deleteDoc(doc(db, "follows", d.id)));
+                    } else {
+                        await addDoc(collection(db, "follows"), { from: currentUser.email, to: profileTargetEmail });
+                    }
+                });
+
+                document.getElementById('p-action-block').addEventListener('click', async () => {
+                    if (confirm(`${targetId}님을 차단하시겠습니까?`)) {
+                        await addDoc(collection(db, "blocks"), { from: currentUser.email, to: profileTargetEmail });
+                        alert('차단되었습니다.');
+                        switchTab('feed'); 
+                    }
+                });
+            } else {
+                profileActionArea.innerHTML = '';
+            }
+        }
+
+        const snapFollowers = await getDocs(query(collection(db, "follows"), where("to", "==", profileTargetEmail)));
+        followerCount.innerText = snapFollowers.size;
+
+        const snapFollowings = await getDocs(query(collection(db, "follows"), where("from", "==", profileTargetEmail)));
+        followingCount.innerText = snapFollowings.size;
+    }
+
+    // 🌟 [추가 기능] 팔로우 / 팔로워 리스트 모달 팝업 오픈 기믹
+    async function openRelationModal(type) {
+        if (!profileTargetEmail) return;
+        
+        modalListBody.innerHTML = '読み込み中...';
+        relationModal.style.display = 'flex';
+
+        let userList = [];
+        
+        if (type === 'followers') {
+            modalTitle.innerText = 'フォロワー';
+            // 나를 타겟으로 삼은(to) 데이터를 찾으면 그게 내 팔로워들(from)
+            const snap = await getDocs(query(collection(db, "follows"), where("to", "==", profileTargetEmail)));
+            snap.forEach(doc => userList.push(doc.data().from));
+        } else {
+            modalTitle.innerText = 'フォロー中';
+            // 내가(from) 바라보는 타겟(to) 데이터들을 조회
+            const snap = await getDocs(query(collection(db, "follows"), where("from", "==", profileTargetEmail)));
+            snap.forEach(doc => userList.push(doc.data().to));
+        }
+
+        modalListBody.innerHTML = '';
+
+        if (userList.length === 0) {
+            modalListBody.innerHTML = `<div class="modal-empty-msg">ユーザーがいません。</div>`;
+            return;
+        }
+
+        userList.forEach(email => {
+            const userId = email.split('@')[0];
+            const item = document.createElement('div');
+            item.className = 'modal-list-item';
+            item.innerHTML = `
+                <img src="https://via.placeholder.com/150" class="modal-user-avatar">
+                <span class="modal-user-id" data-email="${email}">${userId}</span>
+            `;
+            modalListBody.appendChild(item);
+        });
+
+        // 팝업 내 유저 리스트의 아이디를 클릭하면 해당 유저 프로필로 링크 이동 연동
+        document.querySelectorAll('.modal-user-id').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const targetEmail = e.target.getAttribute('data-email');
+                switchTab('profile', targetEmail);
+            });
+        });
+    }
+
+    function closeModal() {
+        relationModal.style.display = 'none';
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    // 배경 클릭 시 닫기 기믹
+    relationModal.addEventListener('click', (e) => { if(e.target === relationModal) closeModal(); });
+
+    // 프로필 글자 클릭 이벤트 바인딩
+    document.getElementById('stat-followers').addEventListener('click', () => openRelationModal('followers'));
+    document.getElementById('stat-followings').addEventListener('click', () => openRelationModal('followings'));
+
+
+    // --- 🖼️ 통합 갤러리 렌더링 ---
+    function renderGallery(photos) {
+        galleryGrid.innerHTML = '';
+        let filteredPhotos = photos.filter(photo => !myBlockedUsers.includes(photo.userEmail));
+
+        let displayPhotos = [];
+        if (currentTab === 'feed') {
+            displayPhotos = filteredPhotos;
+        } else {
+            displayPhotos = filteredPhotos.filter(p => p.userEmail === profileTargetEmail);
+            postCount.innerText = displayPhotos.length;
+        }
+
+        displayPhotos.forEach(photo => {
+            const card = document.createElement('div');
+            card.className = 'photo-card';
+            const uploaderId = photo.userEmail ? photo.userEmail.split('@')[0] : 'unknown';
+            const isMe = currentUser && (currentUser.email === photo.userEmail);
+            const deleteButtonHtml = isMe 
+                ? `<div class="card-footer"><button class="btn-delete" data-id="${photo.id}">削除する</button></div>`
+                : '';
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <span class="card-uploader-id" data-email="${photo.userEmail}">${uploaderId}</span>
+                </div>
+                <div class="photo-img-container">
+                    <img src="${photo.src}" class="photo-img">
+                </div>
+                <div class="photo-content">
+                    <span class="caption-text">${photo.caption}</span>
+                </div>
+                ${deleteButtonHtml}
+            `;
+            galleryGrid.appendChild(card);
+        });
+
+        addGalleryHandlers();
+    }
+
+    function addGalleryHandlers() {
+        document.querySelectorAll('.card-uploader-id').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const targetEmail = e.target.getAttribute('data-email');
+                switchTab('profile', targetEmail);
+            });
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const photoId = e.target.getAttribute('data-id');
+                if (confirm('この投稿を削除しますか？')) {
+                    await deleteDoc(doc(db, "photos", photoId));
+                    alert('投稿を削除しました。');
+                }
+            });
+        });
+    }
+
+    const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
+    onSnapshot(q, (snapshot) => {
+        allPhotos = []; 
+        snapshot.forEach((doc) => {
+            allPhotos.push({ id: doc.id, ...doc.data() });
+        });
+        renderGallery(allPhotos);
+        if (currentTab === 'profile') updateProfileStatsAndButtons();
+    });
+
+    async function savePhoto(imageUrl, caption) {
+        try {
+            await addDoc(collection(db, "photos"), {
+                src: imageUrl, caption: caption, createdAt: new Date(), userEmail: currentUser.email 
+            });
+        } catch (e) {
+            alert("保存に失敗しました。");
+        }
+    }
+
+    function compressAndSave(file, caption) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = new Image();
+            img.onload = function () {
+                const canvas = document.createElement('canvas');
+                let width = img.width; let height = img.height;
+                const MAX_WIDTH = 1024;
+                if (width > MAX_WIDTH) { height = Math.round((height * MAX_WIDTH) / width); width = MAX_WIDTH; }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
+                savePhoto(compressedUrl, caption);
+                document.getElementById('caption-input').value = '';
+                document.getElementById('image-input').value = '';
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    document.getElementById('add-btn').addEventListener('click', () => {
+        const fileInput = document.getElementById('image-input');
+        const captionInput = document.getElementById('caption-input');
+        const file = fileInput.files[0];
+        if (file && captionInput.value) {
+            compressAndSave(file, captionInput.value);
+        } else {
+            alert('写真とキャプションを両方入力してください。');
+        }
+    });
+</script>
+
+</body>
+</html>
