@@ -1,16 +1,21 @@
 // 席のご予約 기능
 function reserve() {
-    // 🌟 대소문자 구분을 위해 guestName으로 수정했습니다!
+    // 入力した内容を取得する
     const name = document.getElementById('guestName').value;
     const count = document.getElementById('guestCount').value;
+   
+    // 結果を表示する場所を取得する
     const result = document.getElementById('reserveResult');
 
-    // 이름이나 인원수가 비어있는지 확인하는 안전장치 추가
-    if (!name || !count) {
-        alert('お名前と人数を入力してください。');
+    // 名前か人数が空だったら、注意メッセージを出して終了する
+    if (name === '' || count === '') {
+        result.textContent = '入力してください';
         return;
+    } else {
+        result.textContent = `✓ ご予約ありがとうございます、${name}様。${count}名様で承りました。`;
     }
+}
 
-    // 결과 텍스트 출력
-    result.textContent = `ご予約ありがとうございます！お名前: ${name}様, 人数: ${count}名`;
+// recommend
+function pickRecommend() {
 }
