@@ -18,4 +18,16 @@ function reserve() {
 
 // recommend
 function pickRecommend() {
+    const items = [
+        '本日のコーヒー',
+        'カフェラテ',
+        'チーズケーキ',
+        'カプチーノ',
+        '抹茶ラテ',
+        'プレーンスコーン',
+    ];
+
+    const i = Math.floor(Math.random() * items.length);
+
+    document.getElementById('recommendResult').textContent = items[i];
 }
