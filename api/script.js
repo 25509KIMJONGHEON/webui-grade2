@@ -144,7 +144,7 @@ async function fetchPokemonData(pokemonId, level) {
             const jaNameObj = moveData.names.find(n => n.language.name === 'ja-Hrkt') || moveData.names.find(n => n.language.name === 'ja');
             const moveJaName = jaNameObj ? jaNameObj.name : moveData.name;
             const ft = moveData.flavor_text_entries.find(e => e.language.name === 'ja-Hrkt' || e.language.name === 'ja');
-            const flavorText = ft ? ft.flavor_text.replace(/\n|\f/g, ' ') : "説明なし(설명 없음)";
+            const flavorText = ft ? ft.flavor_text.replace(/\n|\f/g, ' ') : "説明なし";
             return { name: moveJaName, power: moveData.power || 40, desc: flavorText, type: moveData.type.name };
         } catch(e) { 
             return { name: "たいあたり", power: 40, desc: "いりょくは よわいが あいてに ぶつかって こうげきする。", type: "normal" }; 
@@ -178,7 +178,7 @@ async function selectPokemon(role) {
 
     if (role === 'player' && type === 'existing') {
         const selectVal = document.getElementById('p-existing-select').value;
-        if (!selectVal) return alert('ポケモンを選択してください！ (포켓몬을 선택해주세요!)');
+        if (!selectVal) return alert('ポケモンを選択してください！');
         
         const [loc, idxStr] = selectVal.split('-');
         const idx = parseInt(idxStr);
@@ -239,7 +239,7 @@ async function selectPokemon(role) {
             if (myParty.length < 6) {
                 myParty.push(stats);
             } else {
-                alert('手持ちがいっぱいです！ボックスに送られました。(파티가 가득 차 박스로 보냅니다.)');
+                alert('手持ちがいっぱいです！ボックスに送られました。');
                 pokemonBox.push(stats);
             }
             updatePokedex(stats, true);
@@ -304,7 +304,7 @@ function toggleMenu(menuId) {
 }
 
 document.getElementById('start-battle-btn').addEventListener('click', async () => {
-    if (myParty.length === 0) return alert('手持ちポケモンがいません！ (파티에 포켓몬이 없습니다!)');
+    if (myParty.length === 0) return alert('手持ちポケモンがいません！');
     document.getElementById('start-battle-btn').disabled = true;
     playerParty = myParty; // 실제 전투에는 내가 꾸린 파티를 내보냄
 
@@ -532,7 +532,7 @@ function endGame() {
 document.getElementById('btn-end-battle').addEventListener('click', () => {
     if (pendingCaughtPokemon) {
         document.getElementById('end-battle-menu').classList.add('hidden');
-        document.getElementById('catch-action-text').innerText = `${pendingCaughtPokemon.name}を手持ちに加えますか？\n(잡은 포켓몬을 파티에 추가하시겠습니까?)`;
+        document.getElementById('catch-action-text').innerText = `${pendingCaughtPokemon.name}を手持ちに加えますか？`;
         document.getElementById('catch-action-menu').classList.remove('hidden');
     } else {
         exitBattle();
@@ -593,15 +593,15 @@ window.releasePokemon = function(event, location, index) {
     event.stopPropagation(); // 카드 클릭(교환) 이벤트가 동시에 실행되는 것을 방지
     if (location === 'party') {
         if (myParty.length <= 1) {
-            alert('手持ちポケモンは1匹以上必要です！ (파티には 최소 1마리가 필요합니다!)');
+            alert('手持ちポケモンは1匹以上必要です！');
             return;
         }
-        if (confirm(`${myParty[index].name} を 本当に にがしますか？\n(정말 놓아주시겠습니까?)`)) {
+        if (confirm(`${myParty[index].name} を 本当に にがしますか？`)) {
             myParty.splice(index, 1);
             updateMyPartyUI();
         }
     } else if (location === 'box') {
-        if (confirm(`${pokemonBox[index].name} を 本当に にがしますか？\n(정말 놓아주시겠습니까?)`)) {
+        if (confirm(`${pokemonBox[index].name} を 本当に にがしますか？`)) {
             pokemonBox.splice(index, 1);
             updatePokemonBoxUI();
         }
@@ -611,7 +611,7 @@ window.releasePokemon = function(event, location, index) {
 function updatePokemonBoxUI() {
     const list = document.getElementById('pokemon-box-list');
     if (pokemonBox.length === 0) {
-        list.innerHTML = '<p style="color: #777;">まだ つかまえた ポケモンがいません。 (아직 잡은 포켓몬이 없습니다.)</p>';
+        list.innerHTML = '<p style="color: #777;">まだ つかまえた ポケモンがいません。</p>';
         return;
     }
     list.innerHTML = '';
@@ -631,7 +631,7 @@ function updatePokemonBoxUI() {
                 updateMyPartyUI();
                 updatePokemonBoxUI();
             } else {
-                alert('手持ちがいっぱいです！ (파티가 가득 찼습니다!)');
+                alert('手持ちがいっぱいです！');
             }
         };
         list.appendChild(div);
@@ -643,7 +643,7 @@ function updatePokemonBoxUI() {
 function updateMyPartyUI() {
     const list = document.getElementById('my-party-list');
     if (myParty.length === 0) {
-        list.innerHTML = '<p style="color: #777;">ポケモンを選択して追加してください。(포켓몬을 검색해 추가해 주세요.)</p>';
+        list.innerHTML = '<p style="color: #777;">ポケモンを選択して追加してください。</p>';
         document.getElementById('p-result').innerHTML = '';
         return;
     }
@@ -664,7 +664,7 @@ function updateMyPartyUI() {
                 updateMyPartyUI();
                 updatePokemonBoxUI();
             } else {
-                alert('手持ちポケモンは1匹以上必要です！ (파티에는 최소 1마리가 필요합니다!)');
+                alert('手持ちポケモンは1匹以上必要です！');
             }
         };
         list.appendChild(div);
@@ -690,7 +690,7 @@ function updateExistingPokemonSelect() {
 
     if (myParty.length > 0) {
         const optgroup = document.createElement('optgroup');
-        optgroup.label = "手持ち (내 파티)";
+        optgroup.label = "手持ち";
         myParty.forEach((p, index) => {
             const opt = document.createElement('option');
             opt.value = `party-${index}`;
@@ -703,7 +703,7 @@ function updateExistingPokemonSelect() {
 
     if (pokemonBox.length > 0) {
         const optgroup = document.createElement('optgroup');
-        optgroup.label = "ボックス (박스)";
+        optgroup.label = "ボックス";
         pokemonBox.forEach((p, index) => {
             const opt = document.createElement('option');
             opt.value = `box-${index}`;
@@ -717,7 +717,7 @@ function updateExistingPokemonSelect() {
     if (!hasPokemon) {
         const opt = document.createElement('option');
         opt.value = "";
-        opt.text = "ポケモンがいません (포켓몬 없음)";
+        opt.text = "ポケモンがいません";
         select.appendChild(opt);
     }
 }
@@ -788,11 +788,11 @@ function renderShop() {
                 <img src="${item.img}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 10px;">
                 <div>
                     <div style="font-weight: bold; font-size: 14px;">${item.name}</div>
-                    <div style="font-size: 12px; color: #555;">所持 (소지): ${item.count}個</div>
+                    <div style="font-size: 12px; color: #555;">所持: ${item.count}個</div>
                     <div style="font-size: 14px; color: #d32f2f; font-weight: bold;">${price}円</div>
                 </div>
             </div>
-            <button style="padding: 5px 10px;" onclick="buyItem('${key}')">買う (구매)</button>
+            <button style="padding: 5px 10px;" onclick="buyItem('${key}')">買う</button>
         `;
         list.appendChild(div);
     });
@@ -807,7 +807,7 @@ window.buyItem = function(key) {
         saveGameState();
         renderShop();
     } else {
-        alert('お金が足りません！ (돈이 부족합니다!)');
+        alert('お金が足りません！');
     }
 };
 

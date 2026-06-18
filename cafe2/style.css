@@ -5,11 +5,11 @@
 }
 
 :root {
-  --main-color:   #78350F; /* 메인 색상 (짙은 갈색) */
-  --accent-color: #F59E0B; /* 포인트 색상 (오렌지) */
-  --bg-color:     #FEF3C7; /* 배경색 (은은하고 따뜻한 크림 베이지색으로 변경) */
-  --text-color:   #1F2937; /* 글자색 */
-  --card-color:   #FFFFFF; /* 카드 배경 */
+  --main-color:   #78350F; /* メインカラー（濃い茶色） */
+  --accent-color: #F59E0B; /* アクセントカラー（オレンジ） */
+  --bg-color:     #FEF3C7; /* 背景色（淡く温かみのあるクリームベージュに変更） */
+  --text-color:   #1F2937; /* 文字色 */
+  --card-color:   #FFFFFF; /* カード背景 */
   --muted-color:  #6B7280; 
 }
 
@@ -22,7 +22,7 @@ h1, h2, h3 {
     color: var(--main-color);
 }
 
-/* 네비게이션 링크 링크 스타일 깔끔하게 정리 */
+/* ナビゲーションリンクのスタイルを整理 */
 nav a {
     text-decoration: none;
     color: var(--text-color);
@@ -97,7 +97,7 @@ section h2 {
     border-radius: 12px;
 }
 
-/* 🌟 Menu Grid 정렬 수정 */
+/* 🌟 Menu Grid の整列を修正 */
 .menu-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
