@@ -494,9 +494,8 @@ async function executeMove(attacker, defender, move, role) {
         if (role === 'player') {
             const earnedMoney = defender.level * 50;
             money += earnedMoney;
-            logMessage('<b>たたかいに かった！ ✨</b>');
+            logMessage(`<b>たたかいに かった！ ✨ ${defender.name}を倒して ${earnedMoney}円 を 手に入れた！</b>`);
             logMessage(`<b>${earnedMoney}円 を 手に入れた！</b>`);
-            updateMoneyUI();
             saveGameState();
             endGame();
         } else {
@@ -587,6 +586,7 @@ function exitBattle() {
     }
     updateMyPartyUI();
     updatePokemonBoxUI();
+    saveGameState(); // 배틀 종료 시 상태 저장
 }
 
 window.releasePokemon = function(event, location, index) {
