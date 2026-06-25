@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポケモンバトルシミュレーター</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+        body { font-family: 'DotGothic16', 'Hiragino Maru Gothic ProN', 'Meiryo', sans-serif; padding: 20px; background-color: #2c3e50; display: flex; flex-direction: column; align-items: center; }
+        h1 { color: #f1c40f; text-shadow: 3px 3px 0px #000; letter-spacing: 2px; margin-bottom: 30px; text-align: center; }
+        .setup-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; max-width: 800px; }
+        .box { border: 4px solid #333; border-radius: 12px; padding: 20px; width: 320px; background-color: #f8f9fa; box-shadow: 6px 6px 0px rgba(0,0,0,0.3); color: #333; }
+        .box h2 { border-bottom: 2px dashed #ccc; padding-bottom: 10px; margin-top: 0; }
+        .hidden { display: none !important; }
+        .input-group { margin-bottom: 10px; }
+        .result-box { margin-top: 15px; min-height: 100px; font-size: 16px; }
+        button { padding: 10px 15px; cursor: pointer; border: 3px solid #333; background: #fff; border-radius: 6px; font-family: inherit; font-size: 16px; font-weight: bold; box-shadow: 2px 2px 0px rgba(0,0,0,0.2); transition: all 0.1s; }
+        button:hover:not(:disabled) { background: #f0f0f0; transform: translate(2px, 2px); box-shadow: 0px 0px 0px rgba(0,0,0,0.2); }
+        button:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        /* Battle Arena Styles */
+        #battle-screen { width: 100%; max-width: 600px; background: #e0e0e0; border: 6px solid #222; border-radius: 16px; padding: 15px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .arena { display: flex; flex-direction: column; gap: 20px; height: 320px; position: relative; margin-bottom: 15px; background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 55%, #81C784 55%, #4CAF50 100%); border: 4px solid #333; border-radius: 10px; overflow: hidden; }
+        .pokemon-container { display: flex; align-items: flex-end; position: absolute; width: 60%; }
+        .opponent-side { top: 20px; right: 10px; justify-content: flex-end; flex-direction: row-reverse; }
+        .player-side { bottom: 20px; left: 10px; }
+        .status-box { background: #ffffe0; border: 4px solid #333; border-radius: 8px 8px 24px 8px; padding: 10px 15px; width: 180px; z-index: 2; box-shadow: 3px 3px 0px rgba(0,0,0,0.3); }
+        .status-box h4 { margin: 0 0 5px 0; font-size: 18px; display: flex; justify-content: space-between; }
+        .hp-bar-bg { width: 100%; height: 10px; background: #555; border-radius: 5px; overflow: hidden; margin-bottom: 5px; border: 2px solid #333; }
+        .hp-bar-fill { height: 100%; background: #4caf50; transition: width 0.3s; }
+        .hp-text { font-size: 14px; text-align: right; margin: 0; font-weight: bold; }
+        .sprite { width: 140px; height: 140px; object-fit: contain; filter: drop-shadow(0px 10px 5px rgba(0,0,0,0.3)); }
+        
+        /* Animations & Effects */
+        @keyframes attackPlayer {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -20px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes attackOpponent {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-30px, 20px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); filter: brightness(1); }
+            20% { transform: translateX(-10px); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); filter: brightness(1); }
+            100% { transform: translateX(0); }
+        }
+        .anim-attack-player { animation: attackPlayer 0.3s ease-in-out; }
+        .anim-attack-opp { animation: attackOpponent 0.3s ease-in-out; }
+        .anim-shake { animation: shake 0.4s ease-in-out; }
+        
+        .effect-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; opacity: 0; pointer-events: none; z-index: 10; }
+        .show-effect { animation: hitEffect 0.5s ease-out forwards; }
+        @keyframes hitEffect {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+            30% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(15deg); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Battle UI */
+        .ui-panel { display: flex; gap: 10px; height: 120px; }
+        .message-box { flex: 2; background: #fff; border: 4px solid #333; border-radius: 10px; padding: 12px; font-size: 18px; overflow-y: auto; line-height: 1.6; box-shadow: inset -3px -3px 0px rgba(0,0,0,0.1); }
+        .menu-box { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #fff; border: 4px solid #333; border-radius: 10px; padding: 8px; box-shadow: inset -3px -3px 0px rgba(0,0,0,0.1); }
+        .menu-btn { font-size: 16px; border: 2px solid transparent; background: transparent; box-shadow: none; text-align: left; padding-left: 10px; }
+        .menu-btn:hover { background: #f0f0f0; border: 2px solid #333; transform: none; box-shadow: inset 2px 2px 0px rgba(0,0,0,0.1); }
+        .menu-btn:hover::before { content: '▶ '; font-size: 12px; }
+        
+        /* Sub Menus */
+        .sub-menu { flex: 1; background: #fff; border: 4px solid #333; border-radius: 10px; padding: 8px; display: flex; flex-wrap: wrap; gap: 5px; overflow-y: auto; box-shadow: inset -3px -3px 0px rgba(0,0,0,0.1); }
+        .sub-menu button { flex: 1 1 45%; font-size: 14px; padding: 8px; }
+        .back-btn { width: 100%; background: #ffcccc !important; border-color: #e74c3c !important; }
+
+        #start-container { color: #fff; text-shadow: 1px 1px 0 #000; }
+    </style>
+</head>
+<body>
+    <h1>ポケモンバトルシミュレーター</h1>
+
+    <div id="setup-screen" class="setup-container">
+        <div class="box" id="player-setup">
+            <h2>自分のポケモン</h2>
+            <div class="input-group">
+                <label><input type="radio" name="p-type" value="random" checked> ランダム</label>
+                <label><input type="radio" name="p-type" value="manual"> 直接指定</label>
+                <label><input type="radio" name="p-type" value="existing"> 所持ポケモン</label>
+            </div>
+            <div class="input-group" id="p-input-container">
+                <input type="text" id="p-name" placeholder="日本語名 (例: ピカチュウ)" disabled>
+            </div>
+            <div class="input-group" id="p-level-container">
+                <label>レベル: <input type="number" id="p-level" value="50" min="1" max="100"></label>
+            </div>
+            <div class="input-group hidden" id="p-existing-container">
+                <select id="p-existing-select" style="width: 100%; padding: 5px;">
+                    <option value="">ポケモンがいません</option>
+                </select>
+            </div>
+            <button id="p-select-btn">決定</button>
+            <div id="p-result" class="result-box"></div>
+        </div>
+
+        <div class="box" id="opp-setup">
+            <h2>相手のポケモン</h2>
+            <div class="input-group">
+                <label><input type="radio" name="o-type" value="random" checked> ランダム</label>
+                <label><input type="radio" name="o-type" value="manual"> 直接指定</label>
+            </div>
+            <div class="input-group">
+                <input type="text" id="o-name" placeholder="日本語名 (例: リザードン)" disabled>
+            </div>
+            <div class="input-group">
+                <label>レベル: <input type="number" id="o-level" value="50" min="1" max="100"></label>
+            </div>
+            <button id="o-select-btn">決定</button>
+            <div id="o-result" class="result-box"></div>
+        </div>
+        
+        <!-- My Party Box -->
+        <div class="box" id="my-party-container" style="width: 100%; max-width: 660px; margin-top: 20px;">
+            <h2>手持ちポケモン (最大6匹)</h2>
+            <div id="my-party-list" style="display: flex; gap: 10px; overflow-x: auto; padding: 10px 0;">
+                <p style="color: #777;">ポケモンを選択して追加してください。</p>
+            </div>
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">※ クリックでボックスと入れ替え</p>
+        </div>
+
+        <!-- Pokemon Box -->
+        <div class="box" id="pokemon-box-container" style="width: 100%; max-width: 660px; margin-top: 20px;">
+            <h2>ポケモンボックス</h2>
+            <div id="pokemon-box-list" style="display: flex; gap: 10px; overflow-x: auto; padding: 10px 0;">
+                <p style="color: #777;">まだ つかまえた ポケモンがいません。</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="start-container" style="margin-bottom: 20px;">
+        <button id="start-battle-btn" style="padding: 10px 20px; font-size: 16px;" disabled>バトル開始！</button>
+        <button id="pokedex-btn" style="padding: 10px 20px; font-size: 16px; background-color: #2196F3; color: white; border-color: #0d47a1;">ポケモン図鑑</button>
+        <button id="shop-btn" style="padding: 10px 20px; font-size: 16px; background-color: #ff9800; color: white; border-color: #e65100;">ショップ</button>
+        <div style="display: inline-block; margin-left: 15px; font-size: 18px; font-weight: bold;">所持金: <span id="money-display">0</span>円</div>
+    </div>
+
+    <div id="pokedex-screen" class="box hidden" style="width: 100%; max-width: 660px; margin-bottom: 20px;">
+        <h2>ポケモン図鑑</h2>
+        <p>見つけた数: <span id="seen-count">0</span> / つかまえた数: <span id="caught-count">0</span></p>
+        <div id="pokedex-list" style="display: flex; flex-wrap: wrap; gap: 10px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #fafafa;"></div>
+        <button id="close-pokedex-btn" style="margin-top: 15px; width: 100%;">閉じる</button>
+    </div>
+
+    <div id="shop-screen" class="box hidden" style="width: 100%; max-width: 660px; margin-bottom: 20px;">
+        <h2>フレンドリィショップ</h2>
+        <p style="font-weight: bold;">所持金: <span id="shop-money-display">0</span>円</p>
+        <div id="shop-items-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+        <button id="close-shop-btn" style="margin-top: 15px; width: 100%;">お店を出る</button>
+    </div>
+
+    <div id="battle-screen" class="hidden">
+        <div class="arena">
+            <div class="pokemon-container opponent-side">
+                <div class="status-box">
+                    <h4 id="o-battle-name"><span>ポケモン</span><span>Lv.50</span></h4>
+                    <div class="hp-bar-bg"><div id="o-hp-bar" class="hp-bar-fill"></div></div>
+                </div>
+                <div style="position: relative; display: inline-block;">
+                    <img id="o-sprite" class="sprite" src="" alt="Opponent">
+                    <div id="o-effect" class="effect-overlay"></div>
+                </div>
+            </div>
+            
+            <div class="pokemon-container player-side">
+                <div class="status-box">
+                    <h4 id="p-battle-name"><span>ポケモン</span><span>Lv.50</span></h4>
+                    <div class="hp-bar-bg"><div id="p-hp-bar" class="hp-bar-fill"></div></div>
+                    <p id="p-hp-text" class="hp-text">100/100</p>
+                </div>
+                <div style="position: relative; display: inline-block;">
+                    <img id="p-sprite" class="sprite" src="" alt="Player">
+                    <div id="p-effect" class="effect-overlay"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ui-panel">
+            <div id="battle-log" class="message-box"></div>
+            
+            <div id="main-menu" class="menu-box">
+                <button class="menu-btn" id="btn-fight">たたかう</button>
+                <button class="menu-btn" id="btn-bag">どうぐ</button>
+                <button class="menu-btn" id="btn-pokemon">ポケモン</button>
+                <button class="menu-btn" id="btn-run">にげる</button>
+            </div>
+            
+            <div id="moves-menu" class="sub-menu hidden"></div>
+            <div id="items-menu" class="sub-menu hidden"></div>
+            <div id="party-menu" class="sub-menu hidden"></div>
+            
+            <div id="end-battle-menu" class="sub-menu hidden">
+                <button id="btn-end-battle" style="width: 100%; height: 100%; background: #4caf50; color: #fff; font-size: 20px;">バトル終了</button>
+            </div>
+            
+            <div id="catch-action-menu" class="sub-menu hidden" style="flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <p id="catch-action-text" style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold;"></p>
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <button id="btn-catch-yes">はい</button>
+                    <button id="btn-catch-no">いいえ</button>
+                </div>
+            </div>
+            <div id="catch-swap-menu" class="sub-menu hidden" style="flex-direction: column;">
+                <p style="margin: 0 0 5px 0; font-size: 14px; font-weight: bold;">入れ替えるポケモンを選んでください</p>
+                <div id="catch-swap-list" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
